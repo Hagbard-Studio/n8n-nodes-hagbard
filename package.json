@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-hagbard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n nodes for Hagbard: new businesses before they open, from public records (trigger, list, get, find by name).",
   "keywords": ["n8n-community-node-package", "hagbard", "new businesses", "leads", "public records"],
   "license": "MIT",
@@ -13,8 +13,7 @@
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
-    "release": "n8n-node release",
-    "prepublishOnly": "n8n-node prerelease"
+    "release": "n8n-node release"
   },
   "files": ["dist"],
   "n8n": {
