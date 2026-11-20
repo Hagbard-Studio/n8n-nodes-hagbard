@@ -1,0 +1,10 @@
+{
+	"node": "n8n-nodes-hagbard.hagbardTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Sales", "Data & Storage"],
+	"resources": {
+		"credentialDocumentation": [{ "url": "https://github.com/Hagbard-Studio/n8n-nodes-hagbard#credentials" }],
+		"primaryDocumentation": [{ "url": "https://github.com/Hagbard-Studio/n8n-nodes-hagbard#readme" }]
+	}
+}
