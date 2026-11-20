@@ -1,8 +1,6 @@
-# Publish to npm with provenance (required for verified n8n community nodes since 1 May 2026).
-# npm trusted publishing: in npm, package settings → Trusted publisher → GitHub Actions,
-# repository Hagbard-Studio/n8n-nodes-hagbard, workflow publish.yml.
-# First publish only: npm requires the package to exist before a trusted publisher can be set up, so v0.1.0 uses a short-lived
-# granular token in the repo secret NPM_TOKEN. After that, delete the secret and the token; without it npm uses the trusted publisher.
+# Publish to npm with provenance (required for verified n8n community nodes since 1 May 2026), on a GitHub release.
+# Authentication is npm trusted publishing (OIDC): npmjs.com → n8n-nodes-hagbard → Settings → Trusted publishing → GitHub Actions,
+# Hagbard-Studio / n8n-nodes-hagbard / publish.yml. No npm token is stored anywhere.
 name: Publish
 on:
   release:
@@ -24,5 +22,3 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
