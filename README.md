@@ -24,7 +24,7 @@ n8n checks the key against `GET /api/v1/me`.
 
 | Node | Operation | API |
 |---|---|---|
-| Hagbard Trigger | New business, stage change, or both; Now Reachable (phone, website or Google found) | `GET /api/v1/triggers/new-businesses` (polling; Now Reachable adds `include=updated`) |
+| Hagbard Trigger | New business, stage change, or both; Now Reachable (phone, website or Google found); Smart Trigger Matched (each new match of your Smart Triggers, or one of them; `GET /api/v1/triggers/rule-matched`) | `GET /api/v1/triggers/new-businesses` (polling; Now Reachable adds `include=updated`) |
 | Hagbard | Get Many | `GET /api/v1/businesses` (county, type, stage, first seen since; cursor pagination) |
 | Hagbard | Get | `GET /api/v1/businesses/{id}` |
 | Hagbard | Find by Name | `GET /api/v1/businesses/lookup?name=&city=` |

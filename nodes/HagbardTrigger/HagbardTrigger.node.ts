@@ -14,6 +14,8 @@ import { hagbardRequest } from '../Hagbard/GenericFunctions';
  * Polls Hagbard for new businesses and stage changes in your counties. Hagbard updates once a day (around 11:00 UTC), so an
  * hourly poll is plenty. Each item has an id "<business id>:<stage>" and is emitted once. "Now Reachable" (entry.updated) fires when a
  * business gets a phone number, a website or a Google listing; the item has a "change" object and never carries the phone number.
+ * "Smart Trigger Matched" (rule.matched) fires for each new match of one of your Smart Triggers (or one chosen trigger), from
+ * GET /api/v1/triggers/rule-matched; the item says which trigger matched, the business and what changed.
  */
 export class HagbardTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -23,7 +25,7 @@ export class HagbardTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["event"]}}',
-		description: 'Starts the workflow when Hagbard finds a new business, a stage change or a new phone/website in your counties',
+		description: 'Starts the workflow when Hagbard finds a new business, a stage change, a new phone/website, or a Smart Trigger match',
 		defaults: { name: 'Hagbard Trigger' },
 		polling: true,
 		inputs: [],
@@ -35,21 +37,37 @@ export class HagbardTrigger implements INodeType {
 				name: 'event',
 				type: 'options',
 				options: [
-					{ name: 'New Business or Stage Change', value: 'any' },
 					{ name: 'New Business', value: 'entry.created' },
-					{ name: 'Stage Change', value: 'entry.stage_changed' },
+					{ name: 'New Business or Stage Change', value: 'any' },
 					{
 						name: 'Now Reachable (Phone, Website or Google Found)',
 						value: 'entry.updated',
 						description: 'The item has a "change" object. A phone change says phone_available: true, never the number.',
 					},
+					{
+						name: 'Smart Trigger Matched',
+						value: 'rule.matched',
+						description: 'Each new match of your Smart Triggers (set them up in Hagbard under Settings → Smart Triggers)',
+					},
+					{ name: 'Stage Change', value: 'entry.stage_changed' },
 				],
 				default: 'entry.created',
+			},
+			{
+				displayName: 'Smart Trigger Name or ID',
+				name: 'rule',
+				type: 'options',
+				typeOptions: { loadOptionsMethod: 'getRules' },
+				displayOptions: { show: { event: ['rule.matched'] } },
+				default: '',
+				description:
+					'Only this Smart Trigger; leave empty for all of them. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Filters',
 				name: 'filters',
 				type: 'collection',
+				displayOptions: { hide: { event: ['rule.matched'] } },
 				placeholder: 'Add Filter',
 				default: {},
 				options: [
@@ -85,6 +103,16 @@ export class HagbardTrigger implements INodeType {
 					value: c.fips as string,
 				}));
 			},
+			async getRules(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const res = await hagbardRequest.call(this, 'GET', '/rules');
+				return [
+					{ name: 'All My Smart Triggers', value: '' },
+					...((res.data as IDataObject[]) ?? []).map((r) => ({
+						name: `${r.name as string}${r.enabled ? '' : ' (off)'}`,
+						value: r.id as string,
+					})),
+				];
+			},
 			async getTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const res = await hagbardRequest.call(this, 'GET', '/types');
 				return ((res.data as string[]) ?? []).map((t) => ({ name: t, value: t }));
@@ -95,10 +123,11 @@ export class HagbardTrigger implements INodeType {
 	async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
 		const state = this.getWorkflowStaticData('node') as { since?: string; seen?: string[] };
 		const event = this.getNodeParameter('event') as string;
+		const manual = this.getMode() === 'manual';
+		if (event === 'rule.matched') return pollRuleMatched.call(this, state, manual);
 		const f = this.getNodeParameter('filters') as IDataObject;
 		const counties = (f.county as string[] | undefined) ?? [];
 		const types = (f.type as string[] | undefined) ?? [];
-		const manual = this.getMode() === 'manual';
 
 		const res = await hagbardRequest.call(this, 'GET', '/triggers/new-businesses', {
 			limit: 100,
@@ -128,4 +157,30 @@ export class HagbardTrigger implements INodeType {
 		if (!fresh.length) return null;
 		return [fresh.reverse().map((it) => ({ json: it }))];
 	}
+}
+
+/** Smart Trigger Matched: same "since" + "seen" bookkeeping as above, on event_at */
+async function pollRuleMatched(
+	this: IPollFunctions,
+	state: { since?: string; seen?: string[] },
+	manual: boolean,
+): Promise<INodeExecutionData[][] | null> {
+	const rule = this.getNodeParameter('rule', '') as string;
+	const res = await hagbardRequest.call(this, 'GET', '/triggers/rule-matched', {
+		limit: 100,
+		...(rule ? { rule } : {}),
+		...(state.since && !manual ? { since: state.since } : {}),
+	});
+	const all = (res.data as IDataObject[]) ?? [];
+	if (manual) return all.length ? [[{ json: all[0] }]] : null;
+	const seen = new Set(state.seen ?? []);
+	const fresh = all.filter((it) => !seen.has(it.id as string));
+	const newest = all.map((it) => it.event_at as string).sort().at(-1);
+	if (newest) {
+		const atNewest = all.filter((it) => it.event_at === newest).map((it) => it.id as string);
+		state.seen = newest === state.since ? [...new Set([...(state.seen ?? []), ...atNewest])] : atNewest;
+		state.since = newest;
+	}
+	if (!fresh.length) return null;
+	return [fresh.reverse().map((it) => ({ json: it }))];
 }
