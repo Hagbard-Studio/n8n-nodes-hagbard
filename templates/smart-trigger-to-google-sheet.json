@@ -1,0 +1,168 @@
+{
+  "name": "Hagbard Smart Trigger → Google Sheet",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "event": "rule.matched",
+        "rule": ""
+      },
+      "name": "Hagbard Trigger",
+      "type": "n8n-nodes-hagbard.hagbardTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "Matched at",
+              "value": "={{ $json.event_at }}",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "Smart Trigger",
+              "value": "={{ $json.rule.name }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "What changed",
+              "value": "={{ $json.change.label }}",
+              "type": "string"
+            },
+            {
+              "id": "f3",
+              "name": "Business",
+              "value": "={{ $json.business.name }}",
+              "type": "string"
+            },
+            {
+              "id": "f4",
+              "name": "Type",
+              "value": "={{ $json.business.type }}",
+              "type": "string"
+            },
+            {
+              "id": "f5",
+              "name": "City",
+              "value": "={{ $json.business.city }}",
+              "type": "string"
+            },
+            {
+              "id": "f6",
+              "name": "ZIP",
+              "value": "={{ $json.business.zip }}",
+              "type": "string"
+            },
+            {
+              "id": "f7",
+              "name": "Stage",
+              "value": "={{ $json.business.stage }}",
+              "type": "string"
+            },
+            {
+              "id": "f8",
+              "name": "Open in Hagbard",
+              "value": "={{ $json.business.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Columns",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Hagbard Smart Trigger → Google Sheet\nAdds one row per Smart Trigger match. Paste your sheet URL; the first row of the sheet needs the column names from the Columns node.",
+        "height": 180,
+        "width": 360
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -240
+      ]
+    }
+  ],
+  "connections": {
+    "Hagbard Trigger": {
+      "main": [
+        [
+          {
+            "node": "Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Columns": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

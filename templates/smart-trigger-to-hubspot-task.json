@@ -1,0 +1,79 @@
+{
+  "name": "Hagbard Smart Trigger → HubSpot task",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "event": "rule.matched",
+        "rule": ""
+      },
+      "name": "Hagbard Trigger",
+      "type": "n8n-nodes-hagbard.hagbardTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tasks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: { hs_task_subject: $json.change.label + \": \" + ($json.business.name || $json.business.type), hs_task_body: \"Smart Trigger: \" + $json.rule.name + \"\\n\" + [$json.business.type, $json.business.city].filter(Boolean).join(\", \") + \"\\n\" + $json.business.url, hs_timestamp: new Date().toISOString(), hs_task_status: \"NOT_STARTED\", hs_task_type: \"TODO\" } }) }}",
+        "options": {}
+      },
+      "name": "Create HubSpot task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Hagbard Smart Trigger → HubSpot task\nCreates a HubSpot task for each Smart Trigger match (HubSpot OAuth2 credential with task rights). Hagbard can also do this without n8n: Smart Trigger action 'create in my CRM'.",
+        "height": 180,
+        "width": 360
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -240
+      ]
+    }
+  ],
+  "connections": {
+    "Hagbard Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

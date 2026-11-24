@@ -40,6 +40,16 @@ Each business has: name, business type, stage and stage date, first seen, planne
 
 Phone numbers and websites are not part of the API. "Now Reachable" items carry a `change` object (kind, observed_at, source); a phone change says `phone_available: true`, never the number.
 
+## Templates
+
+Ready-made workflows for the **Smart Trigger Matched** event in [`templates/`](templates) (import in n8n: Workflows → Import from File):
+
+- `smart-trigger-to-slack.json`: post each match to a Slack channel
+- `smart-trigger-to-google-sheet.json`: add one row per match to a Google Sheet
+- `smart-trigger-to-hubspot-task.json`: create a HubSpot task per match (Hagbard can also do this itself: Smart Trigger action "create in my CRM")
+
+Pick your credentials after the import. Set up the Smart Triggers themselves in Hagbard under Settings → Smart Triggers.
+
 ## Compatibility
 
 Built with `@n8n/node-cli`, n8n nodes API version 1. No runtime dependencies.

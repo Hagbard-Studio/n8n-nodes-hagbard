@@ -1,0 +1,79 @@
+{
+  "name": "Hagbard Smart Trigger → Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "event": "rule.matched",
+        "rule": ""
+      },
+      "name": "Hagbard Trigger",
+      "type": "n8n-nodes-hagbard.hagbardTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#leads"
+        },
+        "text": "={{ $json.change.label }}: {{ $json.business.name || $json.business.type }} ({{ $json.business.city || $json.business.county_fips }})\nSmart Trigger: {{ $json.rule.name }}\n{{ $json.business.url }}",
+        "otherOptions": {}
+      },
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Hagbard Smart Trigger → Slack\nPosts each new Smart Trigger match to a Slack channel. Pick your Hagbard and Slack credentials and the channel.",
+        "height": 180,
+        "width": 360
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -240
+      ]
+    }
+  ],
+  "connections": {
+    "Hagbard Trigger": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}
