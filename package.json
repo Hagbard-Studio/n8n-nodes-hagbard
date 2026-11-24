@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-hagbard",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "n8n nodes for Hagbard: new businesses before they open, from public records (trigger, list, get, find by name).",
   "keywords": ["n8n-community-node-package", "hagbard", "new businesses", "leads", "public records"],
   "license": "MIT",

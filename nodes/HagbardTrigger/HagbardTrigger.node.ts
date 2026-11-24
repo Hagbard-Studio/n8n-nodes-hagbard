@@ -12,7 +12,8 @@ import { hagbardRequest } from '../Hagbard/GenericFunctions';
 
 /**
  * Polls Hagbard for new businesses and stage changes in your counties. Hagbard updates once a day (around 11:00 UTC), so an
- * hourly poll is plenty. Each item has an id "<business id>:<stage>" and is emitted once.
+ * hourly poll is plenty. Each item has an id "<business id>:<stage>" and is emitted once. "Now Reachable" (entry.updated) fires when a
+ * business gets a phone number, a website or a Google listing; the item has a "change" object and never carries the phone number.
  */
 export class HagbardTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -22,7 +23,7 @@ export class HagbardTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["event"]}}',
-		description: 'Starts the workflow when Hagbard finds a new business or a stage change in your counties',
+		description: 'Starts the workflow when Hagbard finds a new business, a stage change or a new phone/website in your counties',
 		defaults: { name: 'Hagbard Trigger' },
 		polling: true,
 		inputs: [],
@@ -37,6 +38,11 @@ export class HagbardTrigger implements INodeType {
 					{ name: 'New Business or Stage Change', value: 'any' },
 					{ name: 'New Business', value: 'entry.created' },
 					{ name: 'Stage Change', value: 'entry.stage_changed' },
+					{
+						name: 'Now Reachable (Phone, Website or Google Found)',
+						value: 'entry.updated',
+						description: 'The item has a "change" object. A phone change says phone_available: true, never the number.',
+					},
 				],
 				default: 'entry.created',
 			},
@@ -97,6 +103,8 @@ export class HagbardTrigger implements INodeType {
 		const res = await hagbardRequest.call(this, 'GET', '/triggers/new-businesses', {
 			limit: 100,
 			...(state.since && !manual ? { since: state.since } : {}),
+			// entry.updated only on request, so "any" keeps its old meaning (new business or stage change)
+			...(event === 'entry.updated' ? { include: 'updated' } : {}),
 		});
 		const all = ((res.data as IDataObject[]) ?? []).filter((it) => {
 			const b = it.business as IDataObject;
