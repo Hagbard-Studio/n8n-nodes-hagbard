@@ -24,7 +24,7 @@ n8n checks the key against `GET /api/v1/me`.
 
 | Node | Operation | API |
 |---|---|---|
-| Hagbard Trigger | New business, stage change, or both; Now Reachable (phone, website or Google found); Smart Trigger Matched (each new match of your Smart Triggers, or one of them; `GET /api/v1/triggers/rule-matched`) | `GET /api/v1/triggers/new-businesses` (polling; Now Reachable adds `include=updated`) |
+| Hagbard Trigger | New business, stage change, or both; Smart Trigger Matched (each new match of your Smart Triggers, or one of them; `GET /api/v1/triggers/rule-matched`) | `GET /api/v1/triggers/new-businesses` (polling) |
 | Hagbard | Get Many | `GET /api/v1/businesses` (county, type, stage, first seen since; cursor pagination) |
 | Hagbard | Get | `GET /api/v1/businesses/{id}` |
 | Hagbard | Find by Name | `GET /api/v1/businesses/lookup?name=&city=` |
@@ -38,7 +38,7 @@ Full API reference: https://app.hagbard.studio/api/v1/openapi.json
 
 Each business has: name, business type, stage and stage date, first seen, planned opening, address, city, ZIP, county, state, coordinates, a chain flag, one fact from the public records and the owner company (never a person). On lifetime plans, the fact and owner company are hidden until you unlock the business.
 
-Phone numbers and websites are not part of the API. "Now Reachable" items carry a `change` object (kind, observed_at, source); a phone change says `phone_available: true`, never the number.
+Phone numbers and websites are not part of the API.
 
 ## Templates
 

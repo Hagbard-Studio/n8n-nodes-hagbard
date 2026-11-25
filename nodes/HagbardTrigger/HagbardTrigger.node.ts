@@ -39,11 +39,8 @@ export class HagbardTrigger implements INodeType {
 				options: [
 					{ name: 'New Business', value: 'entry.created' },
 					{ name: 'New Business or Stage Change', value: 'any' },
-					{
-						name: 'Now Reachable (Phone, Website or Google Found)',
-						value: 'entry.updated',
-						description: 'The item has a "change" object. A phone change says phone_available: true, never the number.',
-					},
+					// "Now Reachable" (entry.updated) hidden until Hagbard turns on its Google data (LIFECYCLE_GOOGLE); the polling code below stays.
+					// Re-add: { name: 'Now Reachable (Phone, Website or Google Found)', value: 'entry.updated', description: 'The item has a "change" object. A phone change says phone_available: true, never the number.' },
 					{
 						name: 'Smart Trigger Matched',
 						value: 'rule.matched',
